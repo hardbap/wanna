@@ -3,7 +3,8 @@ class WannaScaffoldGenerator < Rails::Generator::NamedBase
   default_options :skip_timestamps => false,
                   :skip_migration  => false,
                   :skip_factory    => false,
-                  :add_helper      => false;
+                  :add_helper      => false,
+                  :functional_test => false
 
   attr_reader :controller_name,
               :controller_class_path,
@@ -52,7 +53,7 @@ class WannaScaffoldGenerator < Rails::Generator::NamedBase
       m.directory(File.join('app/controllers', controller_class_path))
 
       m.directory(File.join('app/views', controller_class_path, controller_file_name))
-      m.directory(File.join('test/functional', controller_class_path))
+
       m.directory(File.join('test/unit', class_path))
 
       for view in scaffold_views
@@ -66,7 +67,12 @@ class WannaScaffoldGenerator < Rails::Generator::NamedBase
         'controller.rb', File.join('app/controllers', controller_class_path, "#{controller_file_name}_controller.rb")
       )
 
-      m.template("functional_test/shoulda_controller.rb", File.join('test/functional', controller_class_path, "#{controller_file_name}_controller_test.rb"))
+      if options[:functional_test]
+        m.directory(File.join('test/functional', controller_class_path))
+        m.template("functional_test/shoulda_controller.rb",
+                   File.join('test/functional', controller_class_path,
+                             "#{controller_file_name}_controller_test.rb"))
+      end
 
       if options[:add_helper]
         m.directory(File.join('app/helpers', controller_class_path))
@@ -99,6 +105,8 @@ class WannaScaffoldGenerator < Rails::Generator::NamedBase
               "Don't generation a factory file for this model") { |v| options[:skip_factory] = v}
       opt.on("--add-helper",
              "Generate a helper for this controller") { |v| options[:add_helper] = v }
+      opt.on("--functional-test",
+             "Generate a functional test for this controller") { |v| options[:functional_test] = v }
     end
 
     def scaffold_views
