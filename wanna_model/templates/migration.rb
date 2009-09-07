@@ -1,23 +1,23 @@
 class <%= migration_name %> < ActiveRecord::Migration
   def self.up
-    create_table :<%= table_name %> do |t|
-<% for attribute in attributes -%>
-      t.<%= attribute.type %> :<%= attribute.name %>
-<% end -%>
-<% unless options[:skip_timestamps] %>
-      t.timestamps
-<% end -%>
+    create_table :<%= table_name %> do |table|
+<%- attributes.each do |attribute| -%>
+      table.<%= attribute.type %> :<%= attribute.name %>
+<%- end -%>
+<%- unless options[:skip_timestamps] %>
+      table.timestamps
+<%- end -%>
     end
-    
+
 <% attributes.select(&:reference?).each do |attribute| -%>
     add_index :<%= table_name %>, :<%= attribute.name %>_id
-<% end -%>  
+<% end -%>
   end
 
   def self.down
-<% attributes.select(&:reference?).each do |attribute| -%>
+<%- attributes.select(&:reference?).each do |attribute| -%>
     remove_index :<%= table_name %>, :<%= attribute.name %>_id
-<% end %>
+<%- end -%>
     drop_table :<%= table_name %>
   end
 end
