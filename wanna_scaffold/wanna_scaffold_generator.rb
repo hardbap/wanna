@@ -77,8 +77,12 @@ class WannaScaffoldGenerator < Rails::Generator::NamedBase
       if options[:add_helper]
         m.directory(File.join('app/helpers', controller_class_path))
         m.directory(File.join('test/unit/helpers', class_path))
-        m.template('helper.rb', File.join('app/helpers', controller_class_path, "#{controller_file_name}_helper.rb"))
-        m.template('helper_test.rb', File.join('test/unit/helpers', class_path, "#{controller_file_name}_helper_test.rb"))
+        m.template('helper.rb',
+                   File.join('app/helpers', controller_class_path,
+                             "#{controller_file_name}_helper.rb"))
+        m.template('helper_test.rb',
+                   File.join('test/unit/helpers', class_path,
+                             "#{controller_file_name}_helper_test.rb"))
       end
 
       m.route_resources controller_file_name
@@ -89,31 +93,33 @@ class WannaScaffoldGenerator < Rails::Generator::NamedBase
 
   protected
 
-    # Override with your own usage banner.
-    def banner
-      "Usage: #{$0} wanna_scaffold ModelName [field:type, field:type]"
-    end
+  # Override with your own usage banner.
+  def banner
+    "Usage: #{$0} wanna_scaffold ModelName [field:type, field:type]"
+  end
 
-    def add_options!(opt)
-      opt.separator ''
-      opt.separator 'Options:'
-      opt.on("--skip-timestamps",
-             "Don't add timestamps to the migration file for this model") { |v| options[:skip_timestamps] = v }
-      opt.on("--skip-migration",
-             "Don't generate a migration file for this model") { |v| options[:skip_migration] = v }
-      opt.on("--skip-factory",
-              "Don't generation a factory file for this model") { |v| options[:skip_factory] = v}
-      opt.on("--add-helper",
-             "Generate a helper for this controller") { |v| options[:add_helper] = v }
-      opt.on("--functional-test",
-             "Generate a functional test for this controller") { |v| options[:functional_test] = v }
+  def add_options!(opt)
+    opt.separator ''
+    opt.separator 'Options:'
+    scaffold_options.each do |key, val|
+      opt.on("--#{key}", val) { |v| options[key.underscore.to_sym] = v }
     end
+  end
 
-    def scaffold_views
-      %w[ index show new edit _form ]
-    end
+  def scaffold_views
+    %w{ index show new edit _form }
+  end
 
-    def model_name
-      class_name.demodulize
-    end
+  def model_name
+    class_name.demodulize
+  end
+
+  def scaffold_options
+    { 'skip-timestamps' => "Don't add timestamps to the migration file for this model",
+      'skip-migration' => "Don't generate a migration file for this model",
+      'skip-factory' => "Don't generation a factory file for this model",
+      'add-helper' => "Generate a helper for this controller",
+      'functional-test' => "Generate a functional test for this controller" }
+
+  end
 end
